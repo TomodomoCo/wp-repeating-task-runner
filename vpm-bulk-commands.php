@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: VPM Bulk Commands
-Version: 2.0.1
+Version: 2.0.2
 Description: Execute custom commands in bulk in the WordPress admin area
 Author: Van Patten Media Inc.
 Author URI: https://www.vanpattenmedia.com/
@@ -35,7 +35,7 @@ class VpmBulkCommands
 	{
 		// Define some variables
 		$this->plugin_dir_url = trailingslashit( plugins_url( '', __FILE__ ) );
-		$this->plugin_version = '2.0.1';
+		$this->plugin_version = '2.0.2';
 
 		// Register the options page in the menu
 		add_action('admin_menu', [$this, 'addPage']);
@@ -67,7 +67,7 @@ class VpmBulkCommands
 		}
 
 		// Get the command class
-		$class = $commands['slug'];
+		$class = $commands[$slug];
 
 		// Execute the command
 		$output = $class->execute($start, $iterations);
@@ -132,7 +132,7 @@ class VpmBulkCommands
 		if (isset($_GET['vpm-bulk-start']))
 			$start = intval($_GET['vpm-bulk-start']);
 
-		if (isset($_GET['ecf-iterations']))
+		if (isset($_GET['vpm-bulk-iterations']))
 			$iterations = intval($_GET['vpm-bulk-iterations']);
 
 		if (isset($_GET['vpm-bulk-command']))
