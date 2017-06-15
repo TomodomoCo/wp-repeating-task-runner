@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: VPM Bulk Commands
-Version: 1.0.0
+Version: 2.0.0
 Description: Execute custom commands in bulk in the WordPress admin area
 Author: Van Patten Media Inc.
 Author URI: https://www.vanpattenmedia.com/
@@ -33,9 +33,9 @@ class VpmBulkCommands
 	 */
 	public function init()
 	{
-		// Define those variables
+		// Define some variables
 		$this->plugin_dir_url = trailingslashit( plugins_url( '', __FILE__ ) );
-		$this->plugin_version = '1.0.0';
+		$this->plugin_version = '2.0.0';
 
 		// Register the options page in the menu
 		add_action('admin_menu', [$this, 'addPage']);
@@ -61,8 +61,13 @@ class VpmBulkCommands
 		$iterations = intval($_POST['vpm-bulk-iterations']);
 		$slug       = sanitize_title($_POST['vpm-bulk-command']);
 
+		// Test for the command class
+		if (isset($commands[$slug])) {
+			wp_die('The command you tried to execute has not been registered.');
+		}
+
 		// Get the command class
-		$class = $commands[$slug];
+		$class = $commands['slug'];
 
 		// Execute the command
 		$output = $class->execute($start, $iterations);
@@ -78,7 +83,7 @@ class VpmBulkCommands
 
 		// Redirect
 		wp_safe_redirect(add_query_arg($args, admin_url('tools.php')));
-		return;
+		exit;
 	}
 
 	/**
@@ -106,8 +111,10 @@ class VpmBulkCommands
 	 */
 	public function getCommands()
 	{
-		do_action('vpm_register_command');
+		// Execute the commands
+		do_action('vpm_bulk_register');
 
+		// Make the command list filterable and pass it on
 		return apply_filters('vpm_bulk_commands', $this->commands);
 	}
 
@@ -118,9 +125,9 @@ class VpmBulkCommands
 		echo '<div class="wrap">';
 		echo '<h2>Bulk Commands</h2>';
 
+		$start      = '';
+		$iterations = '';
 		$slug       = '';
-		$start      = 1;
-		$iterations = 50;
 
 		if (isset($_GET['vpm-bulk-start']))
 			$start = intval($_GET['vpm-bulk-start']);
@@ -129,23 +136,33 @@ class VpmBulkCommands
 			$iterations = intval($_GET['vpm-bulk-iterations']);
 
 		if (isset($_GET['vpm-bulk-command']))
-			$slug = $_GET['vpm-bulk-command'];
+			$slug = sanitize_title($_GET['vpm-bulk-command']);
 
 		echo '<form method="post" action="admin-post.php" id="vpm-bulk-commands">';
-		echo '<h3>Execute a bulk/iteratable task</h3>';
-		echo '<p>Iterates progressively through a command</p>';
+		echo '<h3>Execute a bulk task</h3>';
+		echo '<p>Executes a given command with a starting offset and iteration count</p>';
 		echo '<table class="form-table">';
 			echo '<tr>';
 				echo '<th><label for="vpm-bulk-command">Select a command<label></th>';
 				echo '<td>';
 					echo '<select id="vpm-bulk-command" name="vpm-bulk-command">';
+						// Fetch the commands
 						$commands = $this->getCommands();
-						foreach ( $commands as $command ) {
-							if ( $command->slug === $slug ) {
-								$selected = ' selected';
-							}
 
-							echo '<option value="' . $command->slug . '" ' . $selected . '>' . $command->name . '</option>';
+						if (empty($commands)) {
+							echo '<option value="" selected disabled>No commands registered</option>';
+						}
+
+						// Loop through registered commands
+						foreach ( $commands as $command ) {
+							// Late escaping and sanitization
+							$command_slug = sanitize_title($command->slug);
+							$command_name = esc_html($command->name);
+
+							// Mark the selected slug, if applicable
+							$selected = ($command_slug === $slug) ? ' selected' : '';
+
+							echo '<option value="' . $command_slug . '" ' . $selected . '>' . $command_name . '</option>';
 						}
 					echo '</select>';
 				echo '</td>';
@@ -153,13 +170,13 @@ class VpmBulkCommands
 			echo '<tr>';
 				echo '<th><label for="vpm-bulk-start">Start at</label></th>';
 				echo '<td>';
-					echo '<input type="textbox" name="vpm-bulk-start" id="vpm-bulk-start" value="' . $start . '">';
+					echo '<input type="number" min="0" name="vpm-bulk-start" id="vpm-bulk-start" value="' . $start . '">';
 				echo '</td>';
 			echo '</tr>';
 			echo '<tr>';
 				echo '<th><label for="vpm-bulk-iterations">Iterations to execute</label></th>';
 				echo '<td>';
-					echo '<input type="textbox" name="vpm-bulk-iterations" id="vpm-bulk-iterations" value="' . $iterations . '">';
+					echo '<input type="number" min="0" name="vpm-bulk-iterations" id="vpm-bulk-iterations" value="' . $iterations . '">';
 				echo '</td>';
 			echo '</tr>';
 		echo '</table>';

@@ -4,11 +4,18 @@ A hacky framework for executing 'bulk' commands in the WordPress backend.
 
 Create a class with the following template:
 
-```php
+```
 <?php
 
 class MyCommand {
+	/**
+	 * Must be `sanitize_title` safe
+	 */
 	public $slug = 'my-command';
+
+	/**
+	 * Users see this
+	 */
 	public $name = 'My Command';
 
 	/**
@@ -27,7 +34,7 @@ To register the command, do the following:
 ```php
 <?php
 
-add_action('vpm_register_command', function () {
+add_action('vpm_bulk_register', function () {
 	vpm_bulk_commands()->addCommand(new MyCommand);
 });
 ```
@@ -36,7 +43,7 @@ add_action('vpm_register_command', function () {
 
 This plugin is in development, and the API is subject to change.
 
-This plugin is intended for environments where better alternatives (wp-cli solutions, direct database manipulation, etc.) is not possible or could be problematic.
+This plugin is intended for environments where better alternatives (wp-cli solutions, direct database manipulation, etc.) are not possible or could be problematic.
 
 Your command is responsible for determining how it iterates, and what the meaning of an 'iteration' is at all.
 
