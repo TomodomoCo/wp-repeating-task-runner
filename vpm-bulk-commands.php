@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: VPM Bulk Commands
-Version: 2.1.0
+Version: 2.2.0
 Description: Execute custom commands in bulk in the WordPress admin area
 Author: Van Patten Media Inc.
 Author URI: https://www.vanpattenmedia.com/
@@ -192,19 +192,44 @@ class VpmBulkCommands
 			echo '</tr>';
 		echo '</table>';
 
-		submit_button('Execute Command', 'primary', 'execute');
+		echo '<p>';
+			submit_button('Execute Command', 'primary', 'execute', false);
+
+			if ($continue) {
+				echo ' <input type="button" value="Stop Auto-Execution" class="button secondary" id="vpm-bulk-pause">';
+			}
+		echo '</p>';
+
 		wp_nonce_field('vpm-bulk-commands');
 		echo '<input type="hidden" name="action" value="vpm-bulk-commands">';
 		echo '</form>';
 
-		echo '<script type="text/javascript">';
-		echo "jQuery(document).on('ready', function() {";
-			echo "if (jQuery('input#vpm-bulk-continue').is(':checked')) {";
-				echo "jQuery('form#vpm-bulk-commands').delay(2000).submit();";
-			echo "}";
-		echo "});";
-		echo '</script>';
+		echo $this->getAutoJavaScript();
+
 		echo '</div>';
+	}
+
+	public function getAutoJavaScript()
+	{
+		$script = <<<HTML
+<script type="text/javascript">
+jQuery(document).on('ready', function () {
+	if (jQuery('input#vpm-bulk-continue').is(':checked')) {
+		window.autoExecute = setTimeout(function () {
+			jQuery('form#vpm-bulk-commands').submit();
+		}, 2000);
+	}
+});
+
+jQuery('input#vpm-bulk-pause').on('click', function () {
+	clearTimeout(window.autoExecute);
+	alert('Auto-execution was successfully paused!');
+	jQuery(this).delay(100).fadeOut();
+});
+</script>
+HTML;
+
+		return $script;
 	}
 
 }
