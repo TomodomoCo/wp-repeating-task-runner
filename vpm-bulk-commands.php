@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: VPM Bulk Commands
-Version: 2.0.2
+Version: 2.1.0
 Description: Execute custom commands in bulk in the WordPress admin area
 Author: Van Patten Media Inc.
 Author URI: https://www.vanpattenmedia.com/
@@ -60,6 +60,7 @@ class VpmBulkCommands
 		$start      = intval($_POST['vpm-bulk-start']);
 		$iterations = intval($_POST['vpm-bulk-iterations']);
 		$slug       = sanitize_title($_POST['vpm-bulk-command']);
+		$continue   = intval($_POST['vpm-bulk-continue']);
 
 		// Test for the command class
 		if (!isset($commands[$slug])) {
@@ -79,6 +80,7 @@ class VpmBulkCommands
 			'vpm-bulk-start'      => $start + $iterations,
 			'vpm-bulk-iterations' => $iterations,
 			'vpm-bulk-command'    => $slug,
+			'vpm-bulk-continue'   => $continue,
 		];
 
 		// Redirect
@@ -138,6 +140,9 @@ class VpmBulkCommands
 		if (isset($_GET['vpm-bulk-command']))
 			$slug = sanitize_title($_GET['vpm-bulk-command']);
 
+		if (isset($_GET['vpm-bulk-continue']) && $_GET['vpm-bulk-continue'] == 1)
+			$continue = ' checked';
+
 		echo '<form method="post" action="admin-post.php" id="vpm-bulk-commands">';
 		echo '<h3>Execute a bulk task</h3>';
 		echo '<p>Executes a given command with a starting offset and iteration count</p>';
@@ -179,13 +184,26 @@ class VpmBulkCommands
 					echo '<input type="number" min="0" name="vpm-bulk-iterations" id="vpm-bulk-iterations" value="' . $iterations . '">';
 				echo '</td>';
 			echo '</tr>';
+			echo '<tr>';
+				echo '<th><label for="vpm-bulk-continue">Continue executing automatically</label></th>';
+				echo '<td>';
+					echo '<input type="checkbox" name="vpm-bulk-continue" id="vpm-bulk-continue" value="1" ' . $continue . '>';
+				echo '</td>';
+			echo '</tr>';
 		echo '</table>';
 
-		submit_button();
+		submit_button('Execute Command', 'primary', 'execute');
 		wp_nonce_field('vpm-bulk-commands');
 		echo '<input type="hidden" name="action" value="vpm-bulk-commands">';
 		echo '</form>';
 
+		echo '<script type="text/javascript">';
+		echo "jQuery(document).on('ready', function() {";
+			echo "if (jQuery('input#vpm-bulk-continue').is(':checked')) {";
+				echo "jQuery('form#vpm-bulk-commands').delay(2000).submit();";
+			echo "}";
+		echo "});";
+		echo '</script>';
 		echo '</div>';
 	}
 
