@@ -1,7 +1,7 @@
 <?php
 /*
 Plugin Name: VPM Bulk Commands
-Version: 2.2.0
+Version: 2.2.1
 Description: Execute custom commands in bulk in the WordPress admin area
 Author: Van Patten Media Inc.
 Author URI: https://www.vanpattenmedia.com/
@@ -223,7 +223,7 @@ jQuery(document).on('ready', function () {
 
 jQuery('input#vpm-bulk-pause').on('click', function () {
 	clearTimeout(window.autoExecute);
-	alert('Auto-execution was successfully paused!');
+	alert('Auto-execution was successfully stopped.');
 	jQuery(this).delay(100).fadeOut();
 });
 </script>
