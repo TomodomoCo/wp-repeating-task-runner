@@ -4,7 +4,7 @@ A hacky framework for executing 'bulk' commands in the WordPress backend.
 
 Create a class with the following template:
 
-```
+```php
 <?php
 
 class MyCommand {
