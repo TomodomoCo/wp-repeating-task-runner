@@ -2,53 +2,21 @@
 
 namespace Tomodomo\Plugin\RepeatingTaskRunner;
 
-
-class Admin
+class Admin extends Base
 {
     /**
-     * Execute a task
-     *
      * @return void
      */
-    public function executeTask()
+    public function init()
     {
-        // Get the list of tasks
-        $tasks = $this->getTasks();
+        // Add the menu page
+        add_action('admin_menu', [$this, 'addPage']);
+        add_action('admin_enqueue_scripts', [$this, 'enqueueScripts']);
 
-        // Verify the nonce
-        if (!wp_verify_nonce($_POST['_wpnonce'], 'repeating-task-runner')) {
-            wp_die('Nonce validation error. Something strange is going on… :(');
-        }
+        // Run commands on POST
+        add_action('admin_post_repeating-task-runner', [$this, 'executeTask']);
 
-        // Get the submitted values
-        $start      = intval($_POST['repeating-task-runner-start']);
-        $iterations = intval($_POST['repeating-task-runner-iterations']);
-        $slug       = sanitize_title($_POST['repeating-task-runner-task']);
-        $continue   = intval($_POST['repeating-task-runner-continue']);
-
-        // Test for the task class
-        if (!isset($tasks[$slug])) {
-            wp_die('The task you tried to execute has not been registered.');
-        }
-
-        // Get the task class
-        $task = $tasks[$slug];
-
-        // Execute the task
-        $output = $task->execute($start, $iterations);
-
-        // Build args for the URL
-        $args = [
-            'page'                             => 'repeating-task-runner',
-            'repeating-task-runner-start'      => $start + $iterations,
-            'repeating-task-runner-iterations' => $iterations,
-            'repeating-task-runner-task'       => $slug,
-            'repeating-task-runner-continue'   => $continue,
-        ];
-
-        // Redirect back to the page
-        wp_safe_redirect(add_query_arg($args, admin_url('tools.php')));
-        exit;
+        return;
     }
 
     /**
@@ -104,5 +72,72 @@ class Admin
         require dirname(__DIR__) . '../views/page.php';
 
         return;
+    }
+
+    /**
+     * Enqueue JavaScript file for the admin page
+     *
+     * @return void
+     */
+    public function enqueueScripts()
+    {
+        wp_enqueue_script(
+            'repeating-task-runner',
+            plugins_url('assets/repeating-task-runner.js', dirname(__FILE__)),
+            ['jquery'],
+            false,
+            true
+        );
+
+        return;
+    }
+
+    /**
+     * Execute a task and redirect back to the admin page
+     *
+     * @return void
+     */
+    public function executeTask()
+    {
+        // Verify the nonce
+        if (wp_verify_nonce($_POST['_wpnonce'], 'repeating-task-runner') === false) {
+            wp_die('Nonce validation error. Something strange is going on… :(');
+        }
+
+        // Get the requested task slug
+        $slug = sanitize_title($_POST['repeating-task-runner-task'] ?? '');
+
+        // Try to retreivew the task
+        try {
+            $task = $this->container['framework']->getTask($slug);
+        } catch (\Exception $e) {
+            wp_die('The task you tried to execute has not been registered.');
+        }
+
+        // Clean up the submitted values
+        $start      = absint($_POST['repeating-task-runner-start'] ?? 0);
+        $iterations = absint($_POST['repeating-task-runner-iterations'] ?? 1);
+        $continue   = absint($_POST['repeating-task-runner-continue'] ?? 0);
+
+        // Execute the task
+        try {
+            $output = $task->execute($start, $iterations);
+        } catch (\Exception $e) {
+            // @todo provide a generic task exception class
+            wp_die('Something went wrong while executing this task.');
+        }
+
+        // Build args for the URL
+        $args = [
+            'page'                             => 'repeating-task-runner',
+            'repeating-task-runner-start'      => $start + $iterations,
+            'repeating-task-runner-iterations' => $iterations,
+            'repeating-task-runner-task'       => $slug,
+            'repeating-task-runner-continue'   => $continue,
+        ];
+
+        // Redirect back to the page
+        wp_safe_redirect(add_query_arg($args, admin_url('tools.php')));
+        exit;
     }
 }

@@ -6,10 +6,12 @@
  * Description: Execute custom commands in bulk in the WordPress admin area
  * Author: Tomodomo
  * Author URI: https://tomodomo.co/
-*/
+ */
 
-// Register the options page in the menu
-add_action('admin_menu', [$this, 'addPage']);
+// Potentially load the Composer autoloader
+if (file_exists('vendor/autoload.php')) {
+    require_once 'vendor/autoload.php';
+}
 
-// Execute bulk commands
-add_action('admin_post_repeating-task-runner', [$this, 'executeCommand']);
+// Initialise the plugin
+require_once 'init.php';
