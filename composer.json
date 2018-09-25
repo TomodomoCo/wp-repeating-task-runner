@@ -1,0 +1,28 @@
+{
+  "name": "tomodomo/wp-repeating-task-runner",
+  "description": "Run automatically repeating/iterating tasks in WordPress",
+  "keywords": [
+    "wordpress",
+    "plugin"
+  ],
+  "homepage": "https://tomodomo.co/",
+  "authors": [
+    {
+      "name": "Tomodomo",
+      "homepage": "https://tomodomo.co/"
+    }
+  ],
+  "type": "wordpress-plugin",
+  "require": {
+    "composer/installers": "~1.0",
+    "pimple/pimple": "^3.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Tomodomo\\Plugin\\RepeatingTaskRunner\\": [
+        "src/"
+      ]
+    }
+  }
+}
+

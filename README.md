@@ -1,31 +1,47 @@
-# VPM Bulk Commands
+# WP Repeating Task Runner
 
-A hacky framework for executing 'bulk' commands in the WordPress backend.
+A WordPress plugin framework for executing iterating/repeating commands in the WordPress backend.
+
+
+## Usage
 
 Create a class with the following template:
 
 ```php
 <?php
 
-class MyCommand {
-	/**
-	 * Must be `sanitize_title` safe
-	 */
-	public $slug = 'my-command';
+use Tomodomo\Plugin\RepeatingTaskRunner\TaskInterface;
 
-	/**
-	 * Users see this
-	 */
-	public $name = 'My Command';
+class MyTask implements TaskInterface
+{
+    /**
+     * Unique slug for your task
+     *
+     * @var string
+     */
+    public $slug = 'my-task';
 
-	/**
-	 * Must be named 'execute'
-	 */
-	public function execute($start, $iterations) {
-		// Your code here
+    /**
+     * Friendly name of your task
+     *
+     * @var string
+     */
+    public $name = 'My Task';
 
-		return true;
-	}
+    /**
+     * Execute the command
+     *
+     * @param int $start
+     * @param int $iterations
+     *
+     * @return bool
+     */
+    public function execute(int $start, int $iterations)
+    {
+        // Your code here
+
+        return true;
+    }
 }
 ```
 
@@ -34,25 +50,32 @@ To register the command, do the following:
 ```php
 <?php
 
-add_action('vpm_bulk_register', function () {
-	vpm_bulk_commands()->addCommand(new MyCommand);
+add_filter('Tomodomo\Plugin\RepeatingTaskRunner\tasks', function ($tasks) {
+    $tasks->addCommand(new MyCommand);
+
+    return $tasks;
 });
 ```
 
 ## Notes
 
-This plugin is in development, and the API is subject to change.
+General implementation notes and tips:
 
-This plugin is intended for environments where better alternatives (wp-cli solutions, direct database manipulation, etc.) are not possible or could be problematic.
++ This plugin is in development, and the API is subject to change.
++ This plugin is intended for environments where "better" alternatives (wp-cli solutions, direct database manipulation, etc.) are not possible or could be problematic.
++ Your command is responsible for determining how it iterates, and what the meaning of an 'iteration' is at all.
++ Strive for statelessness.
 
-Your command is responsible for determining how it iterates, and what the meaning of an 'iteration' is at all.
+## About Tomodomo
 
-Strive for statelessness.
+Tomodomo is a creative agency for magazine publishers. We use custom design and technology to speed up your editorial workflow, engage your readers, and build sustainable subscription revenue for your business.
+
+Learn more at [tomodomo.co](https://tomodomo.co) or email us: [hello@tomodomo.co](mailto:hello@tomodomo.co)
 
 ## License & Conduct
 
 This project is licensed under the terms of the MIT License, included in `LICENSE.md`.
 
-All Van Patten Media Inc. open source projects follow a strict code of conduct, included in `CODEOFCONDUCT.md`. We ask that all contributors adhere to the standards and guidelines in that document.
+All open source Tomodomo projects follow a strict code of conduct, included in `CODEOFCONDUCT.md`. We ask that all contributors adhere to the standards and guidelines in that document.
 
 Thank you!
