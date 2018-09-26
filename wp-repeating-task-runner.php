@@ -1,6 +1,6 @@
 <?php
 /**
- * Plugin Name: VPM Bulk Commands
+ * Plugin Name: Tomodomo › Repeating Task Runner
  * Plugin URI: https://www.vanpattenmedia.com/
  * Version: 3.0.0
  * Description: Execute custom commands in bulk in the WordPress admin area

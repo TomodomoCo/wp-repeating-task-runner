@@ -58,18 +58,21 @@ class Admin extends Base
         $continue = ($_GET['repeating-task-runner-continue'] ?? false) ? ' checked' : '';
 
         // Grab the available tasks
-        $tasks = $this->getTasks();
+        $tasks = $this->container['framework']->getTasks();
 
         // Simplify the tasks into an array
-        $tasks = array_map(function ($task) {
+        $tasks = array_map(function ($task) use ($slug){
             return [
-                'slug' => sanitize_title($task->slug),
-                'name' => esc_html($task->name),
+                'slug'     => sanitize_title($task->slug),
+                'name'     => esc_html($task->name),
+                'selected' => $task->slug === $slug,
             ];
         }, $tasks);
 
+        $selectDefaultOption = empty($slug) ? 'selected' : '';
+
         // Load the template
-        require dirname(__DIR__) . '../views/page.php';
+        require trailingslashit(dirname(__DIR__)) . 'views/page.php';
 
         return;
     }

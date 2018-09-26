@@ -7,7 +7,7 @@ class Framework extends Base
     /**
      * @var array
      */
-    public $tasks;
+    public $tasks = [];
 
     /**
      * Register a task

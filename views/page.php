@@ -1,8 +1,7 @@
 <div class="wrap">
-    <h2>Bulk Tasks</h2>
+    <h2>Repeating Task Runner</h2>
 
     <form method="post" action="admin-post.php" id="repeating-task-runner">
-        <h3>Execute a bulk task</h3>
         <p>Executes a given task with a starting offset and iteration count</p>
 
         <table class="form-table">
@@ -12,6 +11,8 @@
                     <select id="repeating-task-runner-task" name="repeating-task-runner-task">
                         <?php if (empty($tasks)) : ?>
                             <option value="" selected disabled>No tasks registered</option>
+                        <?php else : ?>
+                            <option value="" <?php echo $selectDefaultOption; ?> disabled>Select a task to run</option>
                         <?php endif; ?>
 
                         <?php foreach ($tasks as $task) : ?>
