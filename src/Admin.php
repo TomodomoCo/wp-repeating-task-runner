@@ -65,7 +65,7 @@ class Admin extends Base
             return [
                 'slug'     => sanitize_title($task->slug),
                 'name'     => esc_html($task->name),
-                'selected' => $task->slug === $slug,
+                'selected' => ($task->slug === $slug) ? 'selected' : '',
             ];
         }, $tasks);
 
